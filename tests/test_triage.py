@@ -28,6 +28,11 @@ def fake(output):
                 ]
             }
         assert body["max_tokens"] == 500
+        assert body["provider"]["max_price"] == {
+            "prompt": 0.4,
+            "completion": 1.6,
+            "request": 0,
+        }
         assert "tools" not in body
         return {
             "model": MODEL,
@@ -121,3 +126,15 @@ def test_rate_limit_retains_reservation(monkeypatch, tmp_path):
     result = triage(CHECKS, tmp_path / "budget.db", transport)
     assert result["status"] == "unavailable"
     assert result["reservation_retained"]
+
+
+def test_exhausted_budget_never_posts(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-only")
+    db = tmp_path / "budget.db"
+    reserve(db, Decimal("1"))
+
+    def transport(url, body=None, key=None):
+        assert body is None, "Completion request must not be sent"
+        return fake("")(url)
+
+    assert triage(CHECKS, db, transport)["status"] == "unavailable"

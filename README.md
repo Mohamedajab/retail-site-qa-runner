@@ -76,7 +76,9 @@ each request. Pricing is fetched before admission, input is capped at 12,000
 bytes, output at 500 tokens, requests at ten and cumulative reservations at
 US$1. There are no automatic retries. Reservations are never released, including
 uncertain calls. Do not delete the ledger to restart this evaluation's budget.
-No search plugins or tools are enabled; cached input is budgeted at the higher
+Provider price ceilings also reject endpoints above the admitted token prices
+or charging an additional flat request fee. No search plugins or tools are enabled;
+cached input is budgeted at the higher
 uncached price. This is a local spending guard, not an account-wide billing cap.
 
 The six committed cases are a tiny evidence check, not a benchmark of general

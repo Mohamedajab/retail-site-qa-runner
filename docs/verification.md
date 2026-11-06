@@ -2,6 +2,13 @@
 
 Local Windows, Python 3.12.10, Playwright 1.64.1, Chromium.
 
+GitHub Actions [verification run 1](https://github.com/Mohamedajab/retail-site-qa-runner/actions/runs/42226638034)
+passed both offline and browser jobs. Subsequent additions to tests and provider
+price ceilings are verified in the latest Actions run; consult it for current status.
+Live evaluation cost total: **US$0.0013264**, six requests. Total reserved:
+**US$0.0106496**, retained conservatively. The provider price ceiling was added
+after this six-case evaluation and checked without additional paid calls.
+
 The browser scenario test verified healthy and repaired controls (seven checks
 each) and five independent planted defects. Each defect failed its intended
 check. The malformed API blocked only the dependent price comparison, which is

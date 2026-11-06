@@ -130,7 +130,15 @@ def triage(checks, ledger, transport=request_json):
                 "max_tokens": 500,
                 "temperature": 0,
                 "response_format": {"type": "json_object"},
-                "provider": {"allow_fallbacks": False, "require_parameters": True},
+                "provider": {
+                    "allow_fallbacks": False,
+                    "require_parameters": True,
+                    "max_price": {
+                        "prompt": float(prompt * 1_000_000),
+                        "completion": float(completion * 1_000_000),
+                        "request": 0,
+                    },
+                },
             },
             key,
         )
