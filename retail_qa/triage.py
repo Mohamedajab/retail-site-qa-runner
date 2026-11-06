@@ -173,7 +173,7 @@ def triage(checks, ledger, transport=request_json):
             }
         return {
             "status": "available",
-            "label": "AI-generated, unverified",
+            "label": "Model suggestions — check before use",
             "output": output,
             **metadata,
         }

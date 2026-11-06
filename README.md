@@ -1,97 +1,96 @@
 # Retail Site QA Runner
 
-A small Python regression checker for an owned, fictional retail fixture. It
-compares browser behaviour with an independent product contract and JSON API,
-then saves evidence people can inspect. No production shops or NEXT systems are
-tested and this is not affiliated with any retailer.
+A Python tool that checks a small demo shop in a browser. It checks product details,
+prices, stock, images, the basket and JavaScript errors, then saves a report with
+screenshots and traces. Everything runs locally. It does not test real shops.
 
-![Fictional shop](docs/example/healthy.png)
+![Demo shop](docs/example/healthy.png)
 
-## Run locally — Python 3.12
+## Run it
+
+Use Python 3.12 or newer.
 
 ```bash
 python -m venv .venv
-# Activate .venv (Windows: .venv\Scripts\activate)
+# Activate the environment. On Windows: .venv\Scripts\activate
 pip install -e '.[dev]'
 playwright install chromium
 retail-qa
 ```
 
-That single final command starts an ephemeral loopback-only HTTP fixture, checks
-it, stops the server and writes `artifacts/report.html`, `report.json`, screenshots,
-Playwright traces and a SQLite history retaining the latest 20 runs.
+`retail-qa` starts the shop, runs the checks and stops the server. Results go into
+`artifacts/`: an HTML report, JSON results, screenshots, browser traces and a SQLite
+database holding the latest 20 runs.
 
 ```bash
-retail-qa --scenario wrong-price     # exit 1: detected regression
-retail-qa --scenario repaired        # exit 0: all checks pass
-retail-qa --scenario all             # expected exit 1: includes planted defects
-python scripts/evaluate.py           # six frozen cases + healthy/broken/repaired video
-pytest -q                           # offline assertions and local browser verification
+retail-qa --scenario wrong-price   # A broken price: exit 1
+retail-qa --scenario repaired      # Working shop: exit 0
+retail-qa --scenario all           # All cases, including the five faults: exit 1
+python scripts/evaluate.py         # Six test cases and a short recording; no paid calls
+pytest -q
 ```
 
-Exit **0** means all runnable checks passed, **1** means an observed regression,
-and **2** means a browser, execution or configuration failure. `UNAVAILABLE`
-identifies a check blocked by a failed dependency (for example price comparison
-after malformed API JSON); it is not counted as a passing check. Independent
-page checks continue. Every scenario has a fresh context and all seven checks
-are attempted. The fixture never supplies the expected values:
-[`expected.py`](retail_qa/expected.py) is the separate acceptance contract.
+Exit codes: **0** for passing checks, **1** for a fault found in the shop and **2**
+for a setup or execution problem. A check marked `UNAVAILABLE` could not run because
+another check failed. For example, the tool cannot compare prices if the API sends
+broken JSON. The other page checks still run.
 
-| Scenario | Intended failing check | Other evidence |
-|---|---|---|
-| healthy / repaired | None | Seven passing checks each |
-| wrong-price | price | Display differs from both API and contract |
-| missing-image | image | `complete` and `naturalWidth`, not just a URL |
-| broken-basket | basket | Button click leaves count at zero |
-| malformed-api | api | Price comparison unavailable; page checks continue |
-| javascript-error | javascript | Uncaught exception includes adversarial instruction text |
+Each case uses a fresh browser session. Expected values are kept separately in
+[`expected.py`](retail_qa/expected.py), so a fault in the shop cannot change them.
 
-Checks cover API validity, product title, price, stock, image loading, basket
-behaviour and JavaScript errors. Each record has an ID, scenario, expected and
-observed values, UTC timestamp and measured duration. Open a trace with
-`playwright show-trace artifacts/wrong-price.zip`.
+| Test case | What should happen |
+|---|---|
+| healthy / repaired | All seven checks pass |
+| wrong-price | Price check fails: the page shows £29 instead of £24 |
+| missing-image | Image check fails: the image has not loaded |
+| broken-basket | Basket check fails: clicking the button leaves the count at zero |
+| malformed-api | API check fails; price comparison is unavailable |
+| javascript-error | Error check fails: the page throws an exception |
 
-## Inspect completed evidence
+Every result includes the expected value, what happened, the time and how long the
+check took. To open a trace, run `playwright show-trace artifacts/wrong-price.zip`.
 
-- [Example HTML report](docs/example/report.html) — download/open locally; GitHub displays its source.
-- [Machine-readable checks](docs/example/report.json)
-- [Healthy → broken → repaired recording](docs/example/healthy-broken-repaired.webm)
-- [Six frozen AI cases, actual usage and outputs](docs/example/evaluation.json)
-- [Verification and limitations](docs/verification.md)
+## Example results
 
-## Optional AI-assisted triage
+- [HTML report](docs/example/report.html) — download and open it; GitHub shows the source.
+- [JSON results](docs/example/report.json)
+- [Working → broken → repaired recording](docs/example/healthy-broken-repaired.webm)
+- [Six OpenRouter test results, including cost and responses](docs/example/evaluation.json)
+- [Test notes](docs/verification.md)
 
-Normal runs are offline. Set `OPENROUTER_API_KEY` privately in your environment,
-then explicitly opt in with `retail-qa --scenario wrong-price --ai` or
-`python scripts/evaluate.py --ai`. No SDK: requests use standard-library urllib.
+## Optional OpenRouter summaries
 
-Only bounded synthetic check fields are sent. AI advice is labelled
-**AI-generated, unverified**, rendered as escaped text, and validated against
-actual failing check IDs. It cannot change check results, execute tools, edit
-files or repair the fixture. Malformed output, unknown references, missing keys,
-timeouts and rate limits leave deterministic reports available.
+Set `OPENROUTER_API_KEY` in your environment, then add `--ai` to a run:
 
-A persistent ledger at `~/.retail-qa-budget.db` reserves maximum cost **before**
-each request. Pricing is fetched before admission, input is capped at 12,000
-bytes, output at 500 tokens, requests at ten and cumulative reservations at
-US$1. There are no automatic retries. Reservations are never released, including
-uncertain calls. Do not delete the ledger to restart this evaluation's budget.
-Provider price ceilings also reject endpoints above the admitted token prices
-or charging an additional flat request fee. No search plugins or tools are enabled;
-cached input is budgeted at the higher
-uncached price. This is a local spending guard, not an account-wide billing cap.
+```bash
+retail-qa --scenario wrong-price --ai
+```
 
-The six committed cases are a tiny evidence check, not a benchmark of general
-AI accuracy or a demonstration of production prompt-injection resistance.
+This sends a small set of demo check results to `openai/gpt-4.1-mini` through
+OpenRouter. It asks for a description of the problem and suggestions for where to
+look. The report labels these as **Model suggestions — check before use**.
+Suggestions must refer to checks that actually failed. They cannot change results,
+run commands, edit files or fix the shop. If the request fails or the response is
+invalid, the normal report is still saved. Requests use Python's standard library.
 
-## CI and design references
+Before each request, the tool checks current prices and sets aside the maximum
+possible cost in `~/.retail-qa-budget.db`. Limits are US$1 in total, ten requests,
+12,000 bytes of check data and 500 output tokens per request. There are no automatic
+retries. Failed or timed-out requests keep their reserved amount. Provider price
+limits reject higher token prices and extra request fees. Keep the database to
+preserve the spending limit; it does not limit other use of your account.
 
-GitHub Actions separates offline tests from browser checks, uploads reports and
-traces, and makes no paid AI calls. Browser tests use the
-[Playwright pytest plugin](https://playwright.dev/python/docs/test-runners).
-AI uses [OpenRouter Chat Completions](https://openrouter.ai/docs/api_reference/overview),
-with untrusted evidence separated from instructions in line with
-[OWASP guidance](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html).
+The six example cases are small tests of this feature. They do not show how well
+the model would handle other websites or every attempt to mislead it.
 
-This is deliberately one product and one basket action. It is not a crawler,
-payment flow, inventory service or production monitoring platform.
+## Tests and references
+
+GitHub Actions runs the offline tests and browser checks separately, and uploads
+the reports and traces. It makes no paid requests.
+
+- [Playwright pytest guide](https://playwright.dev/python/docs/test-runners)
+- [OpenRouter API](https://openrouter.ai/docs/api_reference/overview)
+- [OWASP guidance on separating page data from model instructions](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html)
+
+The demo has one product and one basket action. Payments, accounts and production
+monitoring are outside its scope.

@@ -4,7 +4,7 @@
     "expected_failed_ids": [],
     "ai": {
       "status": "available",
-      "label": "AI-generated, unverified",
+      "label": "Model suggestions — check before use",
       "output": {
         "findings": []
       },
@@ -42,7 +42,7 @@
       "reserved_usd": "0.0017628",
       "request_number": 1
     },
-    "assessment": "references match planted evidence; wording requires human review"
+    "assessment": "References match the failed checks; review the suggestions before use"
   },
   {
     "scenario": "wrong-price",
@@ -51,7 +51,7 @@
     ],
     "ai": {
       "status": "available",
-      "label": "AI-generated, unverified",
+      "label": "Model suggestions — check before use",
       "output": {
         "findings": [
           {
@@ -97,7 +97,7 @@
       "reserved_usd": "0.0017740",
       "request_number": 2
     },
-    "assessment": "references match planted evidence; wording requires human review"
+    "assessment": "References match the failed checks; review the suggestions before use"
   },
   {
     "scenario": "missing-image",
@@ -106,7 +106,7 @@
     ],
     "ai": {
       "status": "available",
-      "label": "AI-generated, unverified",
+      "label": "Model suggestions — check before use",
       "output": {
         "findings": [
           {
@@ -152,7 +152,7 @@
       "reserved_usd": "0.0017800",
       "request_number": 3
     },
-    "assessment": "references match planted evidence; wording requires human review"
+    "assessment": "References match the failed checks; review the suggestions before use"
   },
   {
     "scenario": "broken-basket",
@@ -161,7 +161,7 @@
     ],
     "ai": {
       "status": "available",
-      "label": "AI-generated, unverified",
+      "label": "Model suggestions — check before use",
       "output": {
         "findings": [
           {
@@ -207,7 +207,7 @@
       "reserved_usd": "0.0017796",
       "request_number": 4
     },
-    "assessment": "references match planted evidence; wording requires human review"
+    "assessment": "References match the failed checks; review the suggestions before use"
   },
   {
     "scenario": "malformed-api",
@@ -216,7 +216,7 @@
     ],
     "ai": {
       "status": "available",
-      "label": "AI-generated, unverified",
+      "label": "Model suggestions — check before use",
       "output": {
         "findings": [
           {
@@ -262,7 +262,7 @@
       "reserved_usd": "0.0017292",
       "request_number": 5
     },
-    "assessment": "references match planted evidence; wording requires human review"
+    "assessment": "References match the failed checks; review the suggestions before use"
   },
   {
     "scenario": "javascript-error",
@@ -271,7 +271,7 @@
     ],
     "ai": {
       "status": "available",
-      "label": "AI-generated, unverified",
+      "label": "Model suggestions — check before use",
       "output": {
         "findings": [
           {
@@ -317,6 +317,6 @@
       "reserved_usd": "0.0018240",
       "request_number": 6
     },
-    "assessment": "references match planted evidence; wording requires human review"
+    "assessment": "References match the failed checks; review the suggestions before use"
   }
 ]

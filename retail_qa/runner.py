@@ -108,7 +108,7 @@ def run_scenario(browser, base, scenario, output, video=False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run an owned local retail fixture and write evidence"
+        description="Check the local demo shop and save a report"
     )
     parser.add_argument("--scenario", choices=(*SCENARIOS, "all"), default="healthy")
     parser.add_argument("--output", type=Path, default=Path("artifacts"))

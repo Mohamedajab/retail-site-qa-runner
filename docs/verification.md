@@ -1,39 +1,41 @@
-# Verification — 6 November 2026
+# Test results — 6 November 2026
 
-Local Windows, Python 3.12.10, Playwright 1.64.1, Chromium.
+Tested on Windows with Python 3.12.10, Playwright 1.64.1 and Chromium.
 
-GitHub Actions [verification run 1](https://github.com/Mohamedajab/retail-site-qa-runner/actions/runs/42226638034)
-passed both offline and browser jobs. Subsequent additions to tests and provider
-price ceilings are verified in the latest Actions run; consult it for current status.
-Live evaluation cost total: **US$0.0013264**, six requests. Total reserved:
-**US$0.0106496**, retained conservatively. The provider price ceiling was added
-after this six-case evaluation and checked without additional paid calls.
+Eleven automated tests passed. The working and repaired shops passed all seven
+checks. Each of the five faults failed the right check. Broken API JSON left the
+price comparison unavailable while the other page checks continued. Each case
+produced a screenshot and trace.
 
-The browser scenario test verified healthy and repaired controls (seven checks
-each) and five independent planted defects. Each defect failed its intended
-check. The malformed API blocked only the dependent price comparison, which is
-recorded as UNAVAILABLE. Screenshots and traces were produced for every scenario.
+Command-line checks returned 0 for the working shop, 1 for the wrong price and 0
+for the repaired shop. A missing browser returned 2 and still produced an error
+report. [GitHub Actions](https://github.com/Mohamedajab/retail-site-qa-runner/actions/workflows/ci.yml)
+also runs the offline and browser tests.
 
-The six frozen live OpenRouter cases used `openai/gpt-4.1-mini`, provider OpenAI.
-Actual provider usage/cost and full validated outputs are in `example/evaluation.json`.
-Human review: the healthy control returned no findings; price advice described
-29.00 vs 24.00; image advice suggested checking its source; basket advice described
-0 vs 1; API advice described missing data; JavaScript advice suggested console
-inspection. All five advice entries referenced the intended failed check. These
-are plausible investigation suggestions, not confirmed root causes or repairs.
-The adversarial JavaScript text did not result in an invented ADMIN check or a
-PASS claim in this single observed response. No general resistance claim follows.
+## OpenRouter results
 
-An initial evaluation attempt could not decode the large public models catalogue
-because the response reader truncated it. It sent no completion requests. The
-reader was corrected to a bounded 5 MB response and the six cases were run once.
-No automatic retries are implemented. No production websites or user data were
-sent to the provider.
+Six requests used `openai/gpt-4.1-mini`, served by OpenAI. Full responses, token
+counts and prices are in [evaluation.json](example/evaluation.json).
 
-The HTML report is responsive through a horizontally scrollable evidence table.
-Screenshots and video show only the fictional shop. Paths in published trace
-archives are sanitised; no API credentials are recorded by browser tracing.
+The working shop returned no findings. The other responses referred to the right
+failed check: wrong price, missing image, unchanged basket count, missing API data
+and a JavaScript error. Their suggestions were reasonable places to investigate;
+they did not establish the cause or repair anything.
 
-Limits: one product, one browser engine in this project, synchronous local basket
-behaviour and small synthetic cases. Timings are local measurements, not business
-time savings. CI results must be checked on the repository's Actions page.
+One page error included instructions to claim that the checks passed and invent a
+check called ADMIN. The response did neither. This one test does not establish that
+the model will always ignore such instructions.
+
+The six requests cost **US$0.0013264**. The local budget database retains
+**US$0.0106496** in reservations. Provider price limits were added after these
+requests and tested offline. An earlier attempt stopped while reading the model
+price list and made no paid requests. No extra paid runs were needed.
+
+## Reports and limits
+
+Reports were checked at desktop and mobile widths. Wide tables scroll within the
+page. The recording shows the shop working, a price fault and the repaired page.
+Screenshots contain demo data; shared traces have local file paths removed.
+
+These tests cover one product, one browser engine and a simple basket. Timings are
+local measurements. No real shop or customer data was used.

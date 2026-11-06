@@ -1,4 +1,4 @@
-"""Six frozen synthetic cases. Live calls occur only with --ai."""
+"""Run six demo cases. Paid requests require --ai."""
 
 import argparse
 import json
@@ -41,7 +41,7 @@ def main():
                     "scenario": scenario,
                     "expected_failed_ids": sorted(expected_ids),
                     "ai": ai,
-                    "assessment": "references match planted evidence; wording requires human review"
+                    "assessment": "References match the failed checks; review the suggestions before use"
                     if ai["status"] == "available" and referenced == expected_ids
                     else "unavailable or incomplete references",
                 }
@@ -74,7 +74,7 @@ def main():
     save_report(
         args.output,
         all_checks,
-        {"label": "AI-generated, unverified", "frozen_cases": results},
+        {"label": "Model suggestions — check before use", "frozen_cases": results},
     )
     print(
         "Six cases recorded; see evaluation.json for actual availability, provider, usage and assessment."
