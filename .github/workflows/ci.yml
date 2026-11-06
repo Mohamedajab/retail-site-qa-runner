@@ -1,0 +1,36 @@
+name: verification
+on: [push, pull_request]
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e '.[dev]'
+      - run: ruff check .
+      - run: pytest -q -m 'not browser'
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e '.[dev]'
+      - run: playwright install --with-deps chromium
+      - run: pytest -q -m browser --tracing retain-on-failure --screenshot only-on-failure
+      - shell: bash
+        run: |
+          set +e
+          retail-qa --scenario all --output artifacts
+          result=$?
+          test "$result" -eq 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-evidence
+          path: |
+            artifacts/
+            test-results/
