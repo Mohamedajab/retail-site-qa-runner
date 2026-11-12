@@ -1,4 +1,4 @@
-# Test results — 6 November 2026
+# Test results 
 
 Tested on Windows with Python 3.12.10, Playwright 1.64.1 and Chromium.
 
